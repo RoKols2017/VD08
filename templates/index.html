@@ -2,42 +2,49 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Котировки акций</title>
+    <title>Финансовый монитор</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #eef2f5;
+            background-color: #f0f2f5;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
+            padding-top: 50px;
         }
-        .stock-box {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            max-width: 500px;
+        .card {
+            background-color: white;
+            padding: 25px;
+            margin: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 400px;
             text-align: center;
         }
-        .stock-info {
-            font-size: 1.5em;
-            margin-bottom: 20px;
+        .label {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .value {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            color: #007bff;
         }
         .time {
-            color: #555;
+            font-size: 0.9em;
+            color: #777;
         }
         .refresh-btn {
-            margin-top: 20px;
+            margin-top: 30px;
             padding: 10px 20px;
+            font-size: 1em;
             background-color: #28a745;
-            color: white;
             border: none;
             border-radius: 5px;
+            color: white;
             cursor: pointer;
-            font-size: 1em;
         }
         .refresh-btn:hover {
             background-color: #218838;
@@ -45,15 +52,34 @@
     </style>
 </head>
 <body>
-    <div class="stock-box">
-        <div class="stock-info">
-            Цена акции <strong>{{ symbol }}</strong>: <br>
-            <strong>{{ price }}</strong> USD
-        </div>
-        <div class="time">Время обновления: {{ time }}</div>
-        <form method="get" action="/">
-            <button class="refresh-btn" type="submit">Обновить</button>
-        </form>
+    <h1>📊 Финансовый монитор</h1>
+
+    <div class="card">
+        <div class="label">Золото (XAU/USD)</div>
+        <div class="value">{{ gold_price if gold_price else "Ошибка" }}</div>
+        <div class="time">Обновлено: {{ gold_time if gold_time else "-" }}</div>
     </div>
+
+    <div class="card">
+        <div class="label">Курс EUR/USD</div>
+        <div class="value">{{ eur_usd if eur_usd else "Ошибка" }}</div>
+        <div class="time">Обновлено: {{ eur_time if eur_time else "-" }}</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Нефть Brent</div>
+        <div class="value">{{ brent_price }}</div>
+        <div class="time">Обновлено: {{ brent_time }}</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Акции IBM</div>
+        <div class="value">{{ ibm_price if ibm_price else "Ошибка" }}</div>
+        <div class="time">Обновлено: {{ ibm_time if ibm_time else "-" }}</div>
+    </div>
+
+    <form method="get" action="/">
+        <button class="refresh-btn">🔄 Обновить данные</button>
+    </form>
 </body>
 </html>

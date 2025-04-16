@@ -2,31 +2,53 @@ from flask import Flask, render_template
 import requests
 
 app = Flask(__name__)
+API_KEY = 'demo'
 
-API_KEY = 'demo'  # ⚠️ замените на свой ключ, если нужно
-SYMBOL = 'IBM'
-API_URL = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={SYMBOL}&interval=5min&apikey={API_KEY}'
-
-@app.route('/')
-def home():
+def get_exchange_rate(from_currency, to_currency):
+    url = f"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={from_currency}&to_currency={to_currency}&apikey={API_KEY}"
     try:
-        response = requests.get(API_URL)
-        response.raise_for_status()
-        data = response.json()
+        r = requests.get(url)
+        data = r.json()
+        rate_info = data["Realtime Currency Exchange Rate"]
+        rate = rate_info["5. Exchange Rate"]
+        time = rate_info["6. Last Refreshed"]
+        return float(rate), time
+    except Exception:
+        return None, None
 
+def get_ibm_stock_price():
+    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey={API_KEY}'
+    try:
+        r = requests.get(url)
+        data = r.json()
         time_series = data.get("Time Series (5min)", {})
         if not time_series:
-            raise ValueError("Нет данных о ценах")
+            raise ValueError("Нет данных")
+        latest_time = sorted(time_series.keys())[-1]
+        latest_data = time_series[latest_time]
+        price = latest_data["1. open"]
+        return float(price), latest_time
+    except Exception:
+        return None, None
 
-        latest_timestamp = sorted(time_series.keys())[-1]
-        latest_data = time_series[latest_timestamp]
-        price = latest_data.get("1. open", "Неизвестно")
+@app.route('/')
+def index():
+    gold_price, gold_time = get_exchange_rate("XAU", "USD")
+    eur_usd, eur_time = get_exchange_rate("EUR", "USD")
+    ibm_price, ibm_time = get_ibm_stock_price()
 
-    except Exception as e:
-        latest_timestamp = "Ошибка"
-        price = "Невозможно получить цену"
+    brent_price = "Недоступно в demo API"
+    brent_time = "-"
 
-    return render_template('index.html', symbol=SYMBOL, time=latest_timestamp, price=price)
+    return render_template("index.html",
+                           gold_price=gold_price,
+                           gold_time=gold_time,
+                           eur_usd=eur_usd,
+                           eur_time=eur_time,
+                           brent_price=brent_price,
+                           brent_time=brent_time,
+                           ibm_price=ibm_price,
+                           ibm_time=ibm_time)
 
 if __name__ == '__main__':
     app.run(debug=True)
